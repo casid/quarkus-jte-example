@@ -10,6 +10,7 @@ import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.GeneratedClassBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
 import io.quarkus.runtime.LaunchMode;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
@@ -42,12 +44,19 @@ public class JteQuarkusProcessor {
     }
 
     @BuildStep(onlyIfNot = IsDevMode.class)
-    public void precompileTemplates(BuildProducer<GeneratedClassBuildItem> classes) {
+    public void precompileTemplates(BuildProducer<GeneratedClassBuildItem> classes, BuildProducer<RuntimeInitializedClassBuildItem> runtimeClasses) {
 
         Path root = Paths.get("target", "jte-classes");
 
         TemplateEngine templateEngine = JteTemplateEngineFactory.create(configuration, null, root);
-        templateEngine.precompileAll();
+        List<String> templates = templateEngine.precompileAll();
+        if (templates.isEmpty()) {
+            return;
+        }
+
+        for (String template : templates) {
+            runtimeClasses.produce(new RuntimeInitializedClassBuildItem(getQualifiedName(template)));
+        }
 
         try (Stream<Path> stream = Files.walk(root)) {
             stream
@@ -72,9 +81,13 @@ public class JteQuarkusProcessor {
 
     private String getQualifiedName(Path root, Path classFile) {
         String name = root.relativize(classFile).toString();
+        return getQualifiedName(name);
+    }
+
+    private String getQualifiedName(String name) {
+        name = name.substring(0, name.lastIndexOf('.'));
         name = name.replace('\\', '/');
         name = name.replace('/', '.');
-        name = name.substring(0, name.length() - ".class".length());
         return name;
     }
 
