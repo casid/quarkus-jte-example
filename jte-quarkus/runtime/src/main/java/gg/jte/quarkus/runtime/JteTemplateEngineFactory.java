@@ -20,7 +20,7 @@ public class JteTemplateEngineFactory {
 
         DirectoryCodeResolver codeResolver = new DirectoryCodeResolver(Paths.get(sourceDir));
 
-        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, targetDirectory, ContentType.valueOf(configuration.contentType), classLoader, "gg.jte.quarkus.generated");
+        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, targetDirectory, ContentType.valueOf(configuration.contentType), classLoader, configuration.packageName);
         templateEngine.setClassPath(Arrays.asList(classPath.split(File.pathSeparator)));
 
         return templateEngine;

@@ -13,7 +13,7 @@ public class JteTemplateRendererPrecompiledProvider {
     @Produces
     @ApplicationScoped
     public TemplateRenderer templateRenderer(JteConfiguration configuration) {
-        TemplateEngine templateEngine = TemplateEngine.createPrecompiled(ContentType.valueOf(configuration.contentType));
+        TemplateEngine templateEngine = TemplateEngine.createPrecompiled(null, ContentType.valueOf(configuration.contentType), null, configuration.packageName);
         return new JteTemplateRenderer(templateEngine);
     }
 }

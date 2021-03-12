@@ -14,4 +14,11 @@ public class JteConfiguration {
     @ConfigItem(defaultValue = "Html")
     public String contentType;
 
+    /**
+     * The package templates are generated to
+     */
+    @ConfigItem(defaultValue = "gg.jte.quarkus.generated")
+    public String packageName;
+
+
 }

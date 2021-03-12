@@ -10,7 +10,7 @@ import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.GeneratedClassBuildItem;
-import io.quarkus.deployment.builditem.nativeimage.RuntimeInitializedClassBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.runtime.LaunchMode;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class JteQuarkusProcessor {
     }
 
     @BuildStep(onlyIfNot = IsDevMode.class)
-    public void precompileTemplates(BuildProducer<GeneratedClassBuildItem> classes, BuildProducer<RuntimeInitializedClassBuildItem> runtimeClasses) {
+    public void precompileTemplates(BuildProducer<GeneratedClassBuildItem> classes, BuildProducer<ReflectiveClassBuildItem> reflectiveClasses) {
 
         Path root = Paths.get("target", "jte-classes");
 
@@ -55,7 +55,7 @@ public class JteQuarkusProcessor {
         }
 
         for (String template : templates) {
-            runtimeClasses.produce(new RuntimeInitializedClassBuildItem(getQualifiedName(template)));
+            reflectiveClasses.produce(new ReflectiveClassBuildItem(true, true, getQualifiedName(template)));
         }
 
         try (Stream<Path> stream = Files.walk(root)) {
